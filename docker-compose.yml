@@ -1,0 +1,38 @@
+
+version: "3.9"
+services:
+  llm:
+    image: ollama/ollama:latest
+    container_name: llm
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./models:/root/.ollama
+    environment:
+      - OLLAMA_LOG_LEVEL=info
+    entrypoint: ["/bin/sh", "-c", "ollama serve & sleep 3 && (ollama list | grep ${LLM_MODEL:-llama-3-8b} || ollama pull ${LLM_MODEL:-llama-3-8b}) && tail -f /dev/null"]
+
+  parser-api:
+    build: ./parser-api
+    container_name: parser_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ${HOST_WORKSPACE}:/workspace:ro
+    depends_on:
+      - llm
+
+  scanner:
+    build: ./scanner
+    container_name: scanner_api
+    volumes:
+      - ${HOST_WORKSPACE}:/workspace:ro
+      - ./data:/data
+    environment:
+      - WORKSPACE=/workspace
+      - OUTPUT_DIR=/data/output
+      - LLM_HOST=${OLLAMA_HOST:-http://llm:11434}
+      - LLM_MODEL=${LLM_MODEL:-llama-3-8b}
+    depends_on:
+      - llm
+      - parser-api
