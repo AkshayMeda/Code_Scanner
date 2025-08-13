@@ -1,4 +1,4 @@
-# Final: Llama 3 Docker Compose Package (Windows)
+# Llama 3 Docker Compose Package (Windows)
 
 This package provides a ready-to-run Docker Compose setup for running **Llama 3** via **Ollama**, plus a lightweight **Parser API** and a **Scanner CLI** that:
 - parses C# and XAML (WPF) files,
